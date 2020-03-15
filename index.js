@@ -1,4 +1,4 @@
-const states = { "0.0": 0, "0.5": 0, "1.0": 0, "1.5": 0, "2.0": 0, "2.5": 0 };
+// example array of bitstates
 const bitStates = ["000", "001", "010", "011", "100", "101", "110", "111"];
 
 
@@ -32,7 +32,6 @@ const getMins = arrs => arrs.map(x => {
 
 
 const calculateBitJumps = map => {
-    //map = ["000", "001", "010", "011", "100", "101"];
     let counter = 0;
 
     for (let i = 0; i < 6; i++) {
@@ -52,7 +51,3 @@ const calculateBitJumps = map => {
     }
     return counter;
 }
-
-console.log(getMins(permutate(bitStates)).length);
-
-

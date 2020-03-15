@@ -2,7 +2,7 @@
 const bitStates = ["000", "001", "010", "011", "100", "101", "110", "111"];
 
 
-const permutate = arr => {
+const permutate = (arr, l) => {
     let arrs = [];
     let counter = null;
     let sol = null;
@@ -11,11 +11,11 @@ const permutate = arr => {
         let r = permutate(arr.slice(0, i).concat(arr.slice(i + 1)));
 
         if (!r.length) {
-            arrs.push([arr[i]]);
+            arrs.push([arr[i]].slice(0, l));
         }
         else {
             for (let j = 0; j < r.length; j++) {
-                arrs.push([arr[i]].concat(r[j]));
+                arrs.push([arr[i]].concat(r[j]).slice(0, l));
             }
         }
     }
@@ -34,7 +34,7 @@ const getMins = arrs => arrs.map(x => {
 const calculateBitJumps = map => {
     let counter = 0;
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < map.length; i++) {
         let currentValue = map[i].split('');
 
         let jump = (map[i + 1] ? map[i + 1] : map[0]).split('');
@@ -51,3 +51,5 @@ const calculateBitJumps = map => {
     }
     return counter;
 }
+
+console.log(getMins(permutate(bitStates, 6)));

@@ -1,31 +1,5 @@
 const fs = require("fs");
 
-
-// [ { jumps: 16,
-//     x: [ '000', '101', '001', '111', '011', '010' ],
-//     totalJumps: 12 },
-//   { jumps: 16,
-//     x: [ '000', '101', '001', '111', '011', '010' ],
-//     totalJumps: 12 },
-//   { jumps: 16,
-//     x: [ '010', '001', '000', '101', '100', '110' ],
-//     totalJumps: 12 },
-//   { jumps: 16,
-//     x: [ '010', '001', '000', '101', '100', '110' ],
-//     totalJumps: 12 },
-//   { jumps: 16,
-//     x: [ '010', '100', '000', '101', '001', '011' ],
-//     totalJumps: 12 },
-//   { jumps: 16,
-//     x: [ '010', '100', '000', '101', '001', '011' ],
-//     totalJumps: 12 },
-//   { jumps: 16,
-//     x: [ '100', '001', '000', '011', '010', '110' ],
-//     totalJumps: 12 },
-//   { jumps: 16,
-//     x: [ '100', '001', '000', '011', '010', '110' ],
-//     totalJumps: 12 },
-
 // example array of bitstates
 const keyStates = ["$0.00", "$0.50", "$1.00", "$1.50", "$2.00", "$2.50", "Unallowed", "Unallowed"];
 const bitStates = ["000", "001", "010", "011", "100", "101", "110", "111"];
@@ -111,7 +85,6 @@ const getNextVendingMachine = table => {
         let arr = sortGMap.slice(sortMap.length, sortGMap.length);
         arr = arr.map(x => { return x.split('') });
         unallowed = unallowed.concat(arr);
-        console.log(unallowed);
     }
 
 

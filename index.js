@@ -1,6 +1,12 @@
 // example array of bitstates
 const bitStates = ["000", "001", "010", "011", "100", "101", "110", "111"];
 
+const columns = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+[0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+[0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1],
+[0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
+[0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
+];
 
 const permutate = (arr, l) => {
     let arrs = [];
@@ -52,4 +58,106 @@ const calculateBitJumps = map => {
     return counter;
 }
 
-console.log(getMins(permutate(bitStates, 6)));
+
+const generateRows = states => {
+    let rows = [];
+
+    for (let i = 0; i < Math.pow(2, columns.length); i++) {
+        let row = [];
+        for (let j = 0; j < columns.length; j++) {
+            row[j] = columns[j][i];
+        }
+        rows[i] = row;
+    }
+
+    return rows;
+};
+
+const getQNext = (row, states) => {
+    let a1 = row[0];
+    let a0 = row[1];
+    let q2 = row[2];
+    let q1 = row[3];
+    let q0 = row[4];
+
+    let r = { row, states, finalRow: [], qNext: null };
+
+    if (!states.x.includes(`${q2}${q1}${q0}`)) {
+        r.finalRow = [a1, a0, q2, q1, q0, "INVALID STATE"];
+        r.qNext = "INVALID STATE";
+        return r;
+    }
+    else if (a1 + a0 == 2) {
+        r.finalRow = [a1, a0, q2, q1, q0, "INVALID INPUT"];
+        r.qNext = "INVALID INPUT";
+        return r;
+    }
+    else if (a1 + a0 == 0) {
+        r.finalRow = [a1, a0, q2, q1, q0, q2, q1, q0];
+        r.qNext = [q2, q1, q0];
+        return r;
+    }
+    else {
+        let index = 0
+        let qNext = states.x[0];
+
+        for (let i = 0; i < states.x.length; i++) {
+            if (states.x[i] == `${q2}${q1}${q0}`) {
+                index = i;
+            }
+        }
+
+        if (a0 == 1) {
+            if (index + 1 >= states.x.length) {
+                qNext = states.x[0];
+            }
+            else {
+                qNext = states.x[index + 1];
+            }
+        }
+        else if (a1 == 1) {
+            if (index + 2 >= states.x.length) {
+                qNext = states.x[0];
+            }
+            else {
+                qNext = states.x[index + 2];
+            }
+        }
+        qNext = qNext.split('');
+        r.finalRow = [a1, a0, q2, q1, q0, parseInt(qNext[2]), parseInt(qNext[1]), parseInt(qNext[0])];
+        r.qNext = qNext;
+        return r;
+    }
+
+}
+
+const getCSVTable = (rows, columns, states) => {
+    let s = "";
+    let columnString = "";
+
+    for (let i = 0; i < columns.length; i++) {
+        columnString += `${columns[i] + (i == columns.length - 1 ? "" : ",")}`;
+    }
+
+    s += columnString + "\n";
+
+    for (let i = 0; i < rows.length; i++) {
+        let r = "";
+        let qNext = getQNext(rows[i], states);
+        for (let j = 0; j < qNext.finalRow.length; j++) {
+            r += `${qNext.finalRow[j] + (j == qNext.finalRow.length - 1 ? "" : ",")}`
+        }
+        s += r + "\n";
+    }
+
+    return s;
+}
+
+let mins = getMins(permutate(bitStates, 6));
+
+console.log(mins);
+
+console.log(getQNext(generateRows({})[19], mins[0]));
+
+//console.log(getCSVTable(generateRows({}), ["a1", "a0", "q2", "q1", "q0", "q2'", "q1'", "q0'"], mins[4]));
+//console.log(getMins(permutate(bitStates, 6)));

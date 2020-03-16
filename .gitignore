@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+map.txt
+
+Output.csv
+
+KMAP_TABLE.csv

@@ -1,6 +1,5 @@
 const fs = require("fs"); 
 
-
 // example array of bitstates
 const keyStates = ["$0.00","$0.50","$1.00","$1.50","$2.00","$2.50","Unallowed","Unallowed"];
 const bitStates = ["000", "001", "010", "011", "100", "101", "110", "111"];
@@ -64,7 +63,8 @@ const arrayEquivilance = (arr1,arr2)=>{
 
 const getNextVendingMachine = table=>{
 
-    const map = getMins(permutate(bitStates,6))[0].x;
+    const map = getMins(permutate(bitStates,6)).filter(x=>x.x[0] == "000" && x.x[1] == "101" && x.x[2] == "001")[0].x;
+    console.log(map); 
     const sortMap = [...map].sort();
     const sortGMap = [...bitStates].sort(); 
     let unallowed = sortMap.reduce((acc,x,i)=>{
@@ -100,8 +100,6 @@ const getNextVendingMachine = table=>{
 
     const fullTable = (table.map((x,i)=>[...x.map(k=>""+k),...answerTable[i]]));
     
-    // console.log(fullTable);
-
     return [fullTable,[...map,...unallowed]];  
 
 
@@ -130,10 +128,94 @@ const makeStateTable = (key,nextFunc) =>{
     fs.writeFile('map.txt',mapStr,err=>{if(err) throw err;}); 
 
     
-    return table
+    return fullTable;
 }
 
-makeStateTable(['A','B','C','D','Q0','Q1','Q2'],getNextVendingMachine); 
+
+
+const generateKMap=(table,inputKeys,outputKeys)=>{
+
+    // max 5 elemens in input keys
+
+    const transpose = matrix => matrix.reduce(
+        ($, row) => row.map((_, i) => [...($[i] || []), row[i]]), 
+        []
+    );
+
+
+    let tempTable = table.slice(1); 
+
+    tempTable = tempTable.filter(row=>(row[2] == 0 && row[3] ==0)); 
+
+    tempTable = [table[0], ...tempTable]; 
+
+
+    const tempTableStr = tempTable.map(x=>x.join(",")).join("\n"); 
+
+    fs.writeFile("KMAP_TABLE.csv",tempTableStr,err=>{if(err) throw err; }); 
+
+    let newTable = transpose(tempTable); 
+
+
+    const TQTable = newTable.filter((x,i)=>inputKeys.includes(x[0])); 
+    const TATable = newTable.filter((x,i)=>outputKeys.includes(x[0])); 
+
+    const QTable = transpose(TQTable); 
+    const ATable = transpose(TATable); 
+
+
+    const geneate1D = (QT,AT)=>{
+        // QT must be length of 4
+
+        const order = ["00","01","11","10"]; 
+
+        let kmaps = AT.map(x=>[[],[],[],[]]); 
+
+        QT.forEach((row,i)=>{
+            let y= ""+row[0]+row[1]; 
+            let x = ""+row[2]+row[3];
+            
+            y = order.indexOf(y); 
+            x = order.indexOf(x);
+
+
+            for(let j = 0; j<kmaps.length;j++){
+                kmaps[j][y][x] = AT[i][j]; 
+            }
+        });
+
+        return kmaps; 
+
+    }
+
+    let table1Key = [];
+    let table2Key = [];
+
+    const QTable1 = transpose(transpose(QTable.filter((x,i)=>{if(x[4] == 0) table1Key.push(i); return x[4] == 0;})).slice(0,4))
+    const QTable2 = transpose(transpose(QTable.filter((x,i)=>{if(x[4] == 1) table2Key.push(i); return x[4] == 1;})).slice(0,4))
+
+    const ATable1 = ATable.filter((x,i)=>table1Key.includes(i));
+    const ATable2 = ATable.filter((x,i)=>table2Key.includes(i));
+
+
+    // console.log(ATable1);
+
+    let kmaps1 = geneate1D(QTable1,ATable1); 
+    let kmaps2 = geneate1D(QTable2,ATable2); 
+
+    console.log(kmaps1[0]); 
+    console.log(kmaps2[0]); 
 
 
 
+
+}
+
+
+// console.log(getMins(permutate(bitStates,6)).filter(x=>x.x[0] == "000" && x.x[1] == "101" && x.x[2] == "001")[0]);
+
+
+const table = makeStateTable(['A','B','C','D','Q0','Q1','Q2'],getNextVendingMachine); 
+
+
+generateKMap(table,['A','B',"Q0","Q1","Q2"],["Q'0","Q'1","Q'2"]); 

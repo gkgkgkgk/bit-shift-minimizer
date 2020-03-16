@@ -155,9 +155,40 @@ const getCSVTable = (rows, columns, states) => {
 
 let mins = getMins(permutate(bitStates, 6));
 
-console.log(mins);
+const findLeastBitChanges = () => {
+    let states = permutate(bitStates, 6);
+    let statesWJumps = [];
+    for (let i = 0; i < states.length; i++) {
+        statesWJumps[i] = { jumps: calculateBitJumps(states[i]), x: states[i] };
+    }
 
-console.log(getQNext(generateRows({})[19], mins[0]));
+    let bits = [["000", "000"], ["000", "101"], ["001", "000"], ["001", "101"], ["010", "000"], ["010", "101"]];
 
-//console.log(getCSVTable(generateRows({}), ["a1", "a0", "q2", "q1", "q0", "q2'", "q1'", "q0'"], mins[4]));
-//console.log(getMins(permutate(bitStates, 6)));
+    for (let i = 0; i < statesWJumps.length; i++) {
+        let counter = 0;
+        for (let j = 0; j < statesWJumps[i].x.length; j++) {
+            let currentValue = statesWJumps[i].x[j].split('');
+            for (let k = 0; k < currentValue.length; k++) {
+                let b1 = bits[j][0].split('')[k];
+                let b2 = bits[j][1].split('')[k];
+                if (currentValue[k] != b1) counter++;
+                if (currentValue[k] != b2) counter++;
+            }
+        }
+
+        statesWJumps[i].totalJumps = counter;
+    }
+    return statesWJumps;
+}
+
+
+console.log(findLeastBitChanges().sort((a, b) => { return (a.totalJumps - b.totalJumps) }).filter(x => (x.jumps == 16)));
+
+
+
+//console.log(mins);
+
+// console.log(getQNext(generateRows({})[19], mins[0]));
+
+// console.log(getCSVTable(generateRows({}), ["a1", "a0", "q2", "q1", "q0", "q2'", "q1'", "q0'"], mins[4]));
+//console.log(getMins(permutate(bitStates, 6)).filter(arr => (arr.x[0] == "000" && arr.x[1] == "101")));

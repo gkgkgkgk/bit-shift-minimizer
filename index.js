@@ -220,24 +220,26 @@ const generateKMap = (table, inputKeys, outputKeys) => {
 
     }
 
-    let table1Key = [];
-    let table2Key = [];
+    if(inputKeys.length == 5){
 
-    const QTable1 = transpose(transpose(QTable.filter((x, i) => { if (x[4] == 0) table1Key.push(i); return x[4] == 0; })).slice(0, 4))
-    const QTable2 = transpose(transpose(QTable.filter((x, i) => { if (x[4] == 1) table2Key.push(i); return x[4] == 1; })).slice(0, 4))
+        let table1Key = [];
+        let table2Key = [];
 
-    const ATable1 = ATable.filter((x, i) => table1Key.includes(i));
-    const ATable2 = ATable.filter((x, i) => table2Key.includes(i));
+        const QTable1 = transpose(transpose(QTable.filter((x, i) => { if (x[4] == 0) table1Key.push(i); return x[4] == 0; })).slice(0, 4))
+        const QTable2 = transpose(transpose(QTable.filter((x, i) => { if (x[4] == 1) table2Key.push(i); return x[4] == 1; })).slice(0, 4))
+
+        const ATable1 = ATable.filter((x, i) => table1Key.includes(i));
+        const ATable2 = ATable.filter((x, i) => table2Key.includes(i));
 
 
-    // console.log(ATable1);
+        // console.log(ATable1);
 
-    let kmaps1 = geneate1D(QTable1, ATable1);
-    let kmaps2 = geneate1D(QTable2, ATable2);
-
-    console.log(kmaps1[2]);
-    console.log(kmaps2[2]);
-
+        let kmaps1 = geneate1D(QTable1, ATable1);
+        let kmaps2 = geneate1D(QTable2, ATable2);
+        return [kmaps1,kmaps2]; 
+    } else if(inputKeys.length == 4) {
+        return geneate1D(QTable,ATable); 
+    } else return false; 
 
 
 
@@ -249,4 +251,5 @@ const generateKMap = (table, inputKeys, outputKeys) => {
 const table = makeStateTable(['A', 'B', 'C', 'D', 'Q0', 'Q1', 'Q2'], getNextVendingMachine);
 
 
-generateKMap(table, ['A', 'B', "Q0", "Q1", "Q2"], ["Q'0", "Q'1", "Q'2"]); 
+let nextMaps = generateKMap(table, ['A', 'B', "Q0", "Q1", "Q2"], ["Q'0", "Q'1", "Q'2"]); 
+let outputMaps = generateKMap(table,["Q0","Q1","Q2"],["O0", "O1", "O2", "S0", "S1", "S2", "T0", "T1", "T3", "L"]);

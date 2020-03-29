@@ -64,7 +64,7 @@ const arrayEquivilance = (arr1, arr2) => {
 const getNextVendingMachine = table => {
 
     const map = getMins(permutate(bitStates, 6)).filter(x => x.x[0] == "000" && x.x[1] == "101" && x.x[2] == "001")[0].x;
-    console.log(map);
+    // console.log(map);
     const sortMap = [...map].sort();
     const sortGMap = [...bitStates].sort();
     let unallowed = sortMap.reduce((acc, x, i) => {
@@ -86,15 +86,16 @@ const getNextVendingMachine = table => {
 
         let inputRow = row.map(x => "" + x);
 
-        if (unallowed.some(x => arrayEquivilance(x, inputRow.slice(4)))) return ['x', 'x', 'x'];
-
-        if(inputRow[2] == '1') return map[0].split(""); 
 
         if (inputRow[3] == '1') return map[0].split("");
 
-        if(arrayEquivilance(inputRow.slice(4),map[map.length-1]) || arrayEquivilance(inputRow.slice(4),map[map.length-2])) return map[0].split(""); 
+        if (unallowed.some(x => arrayEquivilance(x, inputRow.slice(4)))) return ['x', 'x', 'x'];
 
-        if (arrayEquivilance(inputRow.slice(0, 4), ['1', '1', '0', '0'])  || arrayEquivilance(inputRow.slice(0, 4), ['0', '0', '0', '0'])) return inputRow.slice(4);
+        if (inputRow[2] == '1') return inputRow.slice(4);//map[0].split(""); 
+
+        if (arrayEquivilance(inputRow.slice(4), map[map.length - 1]) || arrayEquivilance(inputRow.slice(4), map[map.length - 2])) return map[0].split("");
+
+        if (arrayEquivilance(inputRow.slice(0, 4), ['1', '1', '0', '0']) || arrayEquivilance(inputRow.slice(0, 4), ['0', '0', '0', '0'])) return inputRow.slice(4);
 
         if (inputRow[0] == '1' && inputRow[1] == '0') {
             const currentMap = inputRow.slice(4).join("");
@@ -113,7 +114,7 @@ const getNextVendingMachine = table => {
         return {
             key: x,
             state: map[i] ? map[i].split("") : unallowed[i % 2],
-            output: x != "Unallowed" ? [parseInt(x.slice(1)).toString(2).length == 1 ? (("00" + parseInt(x.slice(1)).toString(2)).split("")) : ("0" + parseInt(x.slice(1)).toString(2)).split(""), Math.round(parseFloat(x.slice(1))) == parseInt(x.slice(1)) ? ["0", "0", "0"] : ["1", "0", "1"], i >= 4 ? Math.round(parseFloat(x.slice(1))) == parseInt(x.slice(1)) ? ["0", "0", "0"] : ["1", "0", "1"] : ["0", "0", "0"], i >= 4 ? "1" : "0"] : ["x", "x", "x", "x", "x", "x", "x", "x", "x", "x"]
+            output: x != "Unallowed" ? [parseInt(x.slice(1)).toString(2).length == 1 ? (("00" + parseInt(x.slice(1)).toString(2)).split("")) : ("0" + parseInt(x.slice(1)).toString(2)).split(""), Math.round(parseFloat(x.slice(1))) == parseInt(x.slice(1)) ? ["0", "0", "0"] : ["1", "0", "1"], i >= 4 ? Math.round(parseFloat(x.slice(1))) == parseInt(x.slice(1)) ? ["0", "0", "0"] : ["1", "0", "1"] : ["0", "0", "0"], i >= 4 ? "0" : "1"] : [...map[0].split(""), ...map[0].split(""), ...map[0].split(""), "1"]  // change all the 0s to the inital state (which )
 
         }
     });
@@ -131,7 +132,7 @@ const getNextVendingMachine = table => {
 
     });
 
-    const fullTable = (table.map((x, i) => [...x.map(k => "" + k), ...answerTable[i],...OutputTable[i]]));
+    const fullTable = (table.map((x, i) => [...x.map(k => "" + k), ...answerTable[i], ...OutputTable[i]]));
 
     return [fullTable, [...map, ...unallowed]];
 
@@ -199,16 +200,33 @@ const generateKMap = (table, inputKeys, outputKeys) => {
     const geneate1D = (QT, AT) => {
         // QT must be length of 4
 
-        const order = ["00", "01", "11", "10"];
+        const orderX = QT[0].length == 2 ? ["0", "1"] : ["00", "01", "11", "10"];
+        const orderY = QT[0].length == 3 || QT[0].length == 2 ? ["0", "1"] : ["00", "01", "11", "10"];
 
-        let kmaps = AT.map(x => [[], [], [], []]);
+        // console.log(orderY);
+        // console.log(orderX);
+        // console.log(AT); 
+
+        let kmaps = AT[0].map(x => orderY.length == 4 ? [[], [], [], []]: [[],[]]);
+
+        console.log(kmaps)
 
         QT.forEach((row, i) => {
-            let y = "" + row[0] + row[1];
+            let y = orderY.length == 2 ? "" + row[0] : "" + row[0] + row[1];
             let x = "" + row[2] + row[3];
 
-            y = order.indexOf(y);
-            x = order.indexOf(x);
+            if (orderY.length == 2) {
+                if (orderX.length == 2) {
+                    x = "" + row[1];
+                } else {
+                    x = "" + row[1] + row[2];
+                }
+            }
+            // console.log(y);
+            // console.log(x); 
+
+            y = orderY.indexOf(y);
+            x = orderX.indexOf(x);
 
 
             for (let j = 0; j < kmaps.length; j++) {
@@ -220,7 +238,9 @@ const generateKMap = (table, inputKeys, outputKeys) => {
 
     }
 
-    if(inputKeys.length == 5){
+    if (inputKeys.length == 5) {
+        // console.log(QTable);
+        // console.log(ATable);
 
         let table1Key = [];
         let table2Key = [];
@@ -232,14 +252,12 @@ const generateKMap = (table, inputKeys, outputKeys) => {
         const ATable2 = ATable.filter((x, i) => table2Key.includes(i));
 
 
-        // console.log(ATable1);
-
         let kmaps1 = geneate1D(QTable1, ATable1);
         let kmaps2 = geneate1D(QTable2, ATable2);
-        return [kmaps1,kmaps2]; 
-    } else if(inputKeys.length == 4) {
-        return geneate1D(QTable,ATable); 
-    } else return false; 
+        return [kmaps1, kmaps2];
+    } else if (inputKeys.length <= 4) {
+        return geneate1D(QTable.slice(1), ATable.slice(1));
+    } else return false;
 
 
 
@@ -251,5 +269,10 @@ const generateKMap = (table, inputKeys, outputKeys) => {
 const table = makeStateTable(['A', 'B', 'C', 'D', 'Q0', 'Q1', 'Q2'], getNextVendingMachine);
 
 
-let nextMaps = generateKMap(table, ['A', 'B', "Q0", "Q1", "Q2"], ["Q'0", "Q'1", "Q'2"]); 
-let outputMaps = generateKMap(table,["Q0","Q1","Q2"],["O0", "O1", "O2", "S0", "S1", "S2", "T0", "T1", "T3", "L"]);
+let nextMaps = generateKMap(table, ['A', 'B', "Q0", "Q1", "Q2"], ["Q'0", "Q'1", "Q'2"]);
+// let outputMaps = generateKMap(table, ["Q0", "Q1", "Q2"], ["O0", "O1", "O2", "S0", "S1", "S2", "T0", "T1", "T3", "L"]);
+
+console.log(nextMaps[0][2]);
+console.log(nextMaps[1][2]);
+
+
